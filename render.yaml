@@ -72,6 +72,6 @@ services:
 
 databases:
   - name: black-team-db
-    plan: basic_256mb
+    plan: free
     region: ohio
     postgresMajorVersion: "16"
