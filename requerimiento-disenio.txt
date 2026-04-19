@@ -1,0 +1,239 @@
+================================================================
+REQUERIMIENTO DE ASSETS VISUALES — BJJ Administrator
+================================================================
+
+Contexto
+--------
+Aplicación web fullstack de gestión para una academia de BJJ
+(Brazilian Jiu-Jitsu). Tiene dos portales: uno para el
+administrador y otro para los alumnos.
+
+La web es 100% responsive. Los breakpoints son:
+  - Mobile:  hasta 640px  (sm)
+  - Tablet:  641px–1024px (md)
+  - Desktop: 1025px+      (lg/xl)
+
+Todos los assets deben funcionar correctamente en los tres
+breakpoints. Donde corresponda se especifican variantes.
+
+Carpeta destino de todos los archivos: /public/
+(Next.js sirve esta carpeta desde la raíz del sitio)
+
+
+================================================================
+1. LOGO PRINCIPAL
+================================================================
+
+Es el asset de mayor prioridad. Se usa en todas las pantallas.
+
+Variante A — Logo horizontal (isotipo + nombre academia)
+  Uso:        Nav desktop, header del login en tablet/desktop
+  Dimensiones: 240×48 px (canvas)
+  Formato:    SVG + PNG @1x (240×48) + PNG @2x (480×96)
+  Fondo:      Transparente
+  Versiones:  - Sobre fondo claro (nav blanco, login blanco)
+              - Sobre fondo oscuro (si el nav tiene sidebar oscuro)
+
+Variante B — Isotipo solo (solo el símbolo, sin texto)
+  Uso:        Nav mobile colapsado, favicon base
+  Dimensiones: 40×40 px (canvas)
+  Formato:    SVG + PNG @1x (40×40) + PNG @2x (80×80)
+  Fondo:      Transparente
+  Versiones:  - Sobre fondo claro
+              - Sobre fondo oscuro
+
+Nota responsive:
+  En mobile el nav lateral se colapsa a una barra superior.
+  En esa barra solo hay espacio para el isotipo (Variante B).
+  En desktop se muestra el logo horizontal completo (Variante A).
+
+
+================================================================
+2. FAVICON / APP ICON
+================================================================
+
+Uso: Pestaña del navegador, bookmark, acceso directo en móvil.
+
+Archivos requeridos:
+  favicon.ico         — 16×16 + 32×32 embebido (multi-resolución)
+  favicon-32x32.png   — 32×32 px
+  favicon-16x16.png   — 16×16 px
+  apple-touch-icon.png — 180×180 px (iOS, fondo sólido requerido,
+                          no transparente)
+  icon-192.png        — 192×192 px (Android PWA)
+  icon-512.png        — 512×512 px (Android PWA splash)
+
+Formato: ICO + PNG
+Base: Usar el isotipo (Variante B del logo)
+
+
+================================================================
+3. FONDO DE PANTALLA — LOGIN Y REGISTRO
+================================================================
+
+Uso: Página /login y /register?token=...
+     Actualmente ambas tienen fondo gris plano (#F9FAFB).
+
+Comportamiento responsive:
+  - Desktop (lg+): Layout dividido 50/50. El lado izquierdo
+    muestra la imagen a pantalla completa (object-cover).
+    El lado derecho tiene el formulario sobre fondo blanco.
+  - Tablet (md):  La imagen ocupa el 40% izquierdo o se usa
+    como fondo completo con overlay semitransparente oscuro.
+  - Mobile (sm):  La imagen NO se muestra para no consumir
+    ancho de banda en datos móviles. Solo se muestra el logo
+    pequeño arriba del formulario.
+
+Dimensiones: 1920×1080 px (se escala con CSS object-cover)
+Formato:     JPG progresivo optimizado (máximo 250 KB)
+             + WebP (máximo 150 KB) para navegadores modernos
+Concepto:    Fotografía de entrenamiento BJJ en tatami.
+             Tonos oscuros o con viñeta para que contraste
+             con el card blanco del formulario.
+             Puede ser levemente desenfocado (bokeh).
+
+Nota: No incluir texto en la imagen (el texto lo pone la app).
+
+
+================================================================
+4. AVATAR / FOTO DE PERFIL POR DEFECTO
+================================================================
+
+Uso: Nav del alumno (junto a su nombre), futura sección de
+     perfil del alumno. Se muestra cuando el alumno no tiene
+     foto cargada.
+
+Dimensiones: Se muestra en círculo de 36×36 px en mobile y
+             40×40 px en desktop.
+Entregar:    SVG escalable (recomendado) o PNG 80×80 px @2x
+Fondo:       Transparente o círculo de color neutro
+Concepto:    Silueta neutra de persona, estilo flat/minimalista.
+             No debe ser genérico (evitar el ícono de usuario
+             de Windows). Puede incorporar algún elemento BJJ
+             sutil (ej. kimono/gi muy simplificado).
+
+
+================================================================
+5. ILUSTRACIÓN — CUENTA PENDIENTE DE APROBACIÓN
+================================================================
+
+Uso: Dashboard del alumno cuando su cuenta fue creada pero el
+     admin aún no la aprobó. Actualmente muestra el emoji ⏳.
+
+Dimensiones: Se muestra centrado, máximo 120×120 px en desktop,
+             80×80 px en mobile.
+Formato:     SVG (escalable, ideal para responsive)
+Concepto:    Ilustración simple y amigable. Puede ser un reloj,
+             una checklist, o una figura esperando. Estilo flat,
+             colores suaves. Incluir un color principal que
+             coincida con la paleta primary de la app (azul).
+
+
+================================================================
+6. ILUSTRACIÓN — ACCESO SOLO POR INVITACIÓN
+================================================================
+
+Uso: Página /register cuando se visita sin token de invitación.
+     Actualmente muestra el emoji 🔒.
+
+Dimensiones: 80×80 px en desktop, 64×64 px en mobile.
+Formato:     SVG
+Concepto:    Candado o escudo de acceso restringido.
+             Estilo flat, minimalista, mismo lenguaje visual
+             que la ilustración anterior.
+
+
+================================================================
+7. LOGO PARA EMAILS TRANSACCIONALES
+================================================================
+
+Uso: Header de todos los emails enviados por el sistema:
+     recordatorios de pago, aprobación de cuenta, rechazo de
+     pago, recordatorio de clase, etc.
+
+IMPORTANTE: Los clientes de email (Gmail, Outlook, Apple Mail)
+NO soportan SVG. Solo PNG.
+
+Dimensiones canvas: 200×50 px
+Entregar:           PNG @2x → 400×100 px
+                    (se renderiza a 200×50 en el email)
+Fondo:              Blanco sólido (#FFFFFF), no transparente
+                    Los clientes de email ignoran la transparencia.
+Versión:            Solo sobre fondo claro (los emails son blancos)
+
+
+================================================================
+8. OPEN GRAPH IMAGE (redes sociales / WhatsApp)
+================================================================
+
+Uso: Preview que se muestra al compartir el link de la app
+     en WhatsApp, Telegram, redes sociales, etc.
+
+Dimensiones: 1200×630 px (estándar Open Graph)
+Formato:     JPG (sin transparencia) o PNG
+Contenido:   Logo + nombre de la academia + tagline corto.
+             Fondo que evoque BJJ (tatami, colores de academia).
+Nota:        No es crítico para el funcionamiento de la app,
+             pero mejora la presentación al compartir el link.
+
+
+================================================================
+RESUMEN DE ENTREGA
+================================================================
+
+Asset                         Archivos        Prioridad
+------------------------------------------------------------
+Logo horizontal (claro)       SVG + 2 PNG     ALTA
+Logo horizontal (oscuro)      SVG + 2 PNG     ALTA
+Isotipo solo (claro)          SVG + 2 PNG     ALTA
+Isotipo solo (oscuro)         SVG + 2 PNG     ALTA
+Favicon / App icons           ICO + 6 PNG     ALTA
+Logo para emails              1 PNG           ALTA
+Fondo login (foto)            JPG + WebP      MEDIA
+Avatar por defecto            SVG             MEDIA
+Ilustración pendiente         SVG             BAJA
+Ilustración sin invitación    SVG             BAJA
+OG Image                      JPG             BAJA
+------------------------------------------------------------
+Total aproximado               ~25 archivos
+
+
+================================================================
+PALETA DE REFERENCIA (Tailwind — tailwind.config.ts)
+================================================================
+
+El sistema usa una paleta "primary" personalizada en Tailwind.
+Coordinar con el equipo de desarrollo el valor exacto del
+color primary antes de definir el logo.
+
+Clases CSS usadas en la app:
+  Botón primario:   bg-primary-600  (fondo del CTA principal)
+  Hover:            bg-primary-700
+  Fondo suave:      bg-primary-50
+  Texto:            text-primary-700
+  Border:           border-primary-200
+
+Grises del sistema (Tailwind defaults):
+  Texto principal:  #111827 (gray-900)
+  Texto secundario: #6B7280 (gray-500)
+  Fondo de página:  #F9FAFB (gray-50)
+  Bordes:           #E5E7EB (gray-200)
+  Cards:            #FFFFFF con sombra sm
+
+
+================================================================
+NOTAS TÉCNICAS PARA EL DISEÑADOR
+================================================================
+
+- Todos los SVG deben ser "clean" (sin capas ocultas, sin
+  metadatos de Illustrator/Figma innecesarios).
+- Los PNG deben estar optimizados (usar TinyPNG o similar).
+- Los SVG del logo deben tener viewBox definido para escalar
+  correctamente sin CSS adicional.
+- La app usa Next.js — los archivos en /public/ se sirven
+  directamente sin procesamiento. Nombrar los archivos en
+  kebab-case sin espacios (ej: logo-horizontal-claro.svg).
+- Para Retina/HiDPI: entregar PNG @2x con el doble de píxeles
+  del tamaño de display (se especificó en cada asset).
+
+================================================================
