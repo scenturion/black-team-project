@@ -6,7 +6,6 @@ services:
     region: ohio
     buildCommand: npm ci && npx prisma generate && npm run build
     startCommand: npm run start
-    preDeployCommand: npx prisma db push
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
@@ -19,50 +18,6 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
-      - key: SENDGRID_API_KEY
-        sync: false
-      - key: EMAIL_FROM
-        sync: false
-      - key: EMAIL_FROM_NAME
-        sync: false
-
-  - type: cron
-    name: black-team-daily
-    runtime: node
-    plan: free
-    schedule: "0 8 * * *"
-    buildCommand: npm ci && npx prisma generate
-    startCommand: npm run job:daily
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: black-team-db
-          property: connectionString
-      - key: APP_BASE_URL
-        sync: false
-      - key: SENDGRID_API_KEY
-        sync: false
-      - key: EMAIL_FROM
-        sync: false
-      - key: EMAIL_FROM_NAME
-        sync: false
-
-  - type: cron
-    name: black-team-class-reminders
-    runtime: node
-    plan: free
-    schedule: "*/15 * * * *"
-    buildCommand: npm ci && npx prisma generate
-    startCommand: npm run job:class-reminders
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: black-team-db
-          property: connectionString
       - key: SENDGRID_API_KEY
         sync: false
       - key: EMAIL_FROM
