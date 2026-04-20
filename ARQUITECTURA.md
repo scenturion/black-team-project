@@ -150,7 +150,9 @@ SystemConfig  (tabla key/value para configuración)
 ### Notas de diseño
 
 - `ClassSchedule` = plantilla recurrente (ej: "BJJ General — Lunes, Miércoles y Viernes a las 20 hs"). El campo `days` es un array de `DayOfWeek` (ej: `["LUNES", "MIERCOLES", "VIERNES"]`), lo que permite que una misma clase ocurra en múltiples días de la semana con el mismo horario y capacidad.
-- `ClassSession` = instancia concreta de una fecha. Se genera **lazy** mediante `ensureSessionsForWeek()` al consultar la semana. Por cada `ClassSchedule` activo, se crea **una `ClassSession` por cada día** del array `days`.
+- `ClassSchedule.deletedAt` (`DateTime?`): baja lógica. Cuando se "elimina" una clase desde el admin, se setea este campo en lugar de borrar el registro. Las sesiones y reservas históricas se conservan. Las clases con `deletedAt != null` se excluyen de todos los listados (admin y alumnos) y de la generación lazy de sesiones.
+- `ClassSchedule.isActive` (`Boolean`): desactivar/reactivar temporalmente una clase sin eliminarla. Las clases inactivas no generan sesiones nuevas y no aparecen en la vista de reservas del alumno.
+- `ClassSession` = instancia concreta de una fecha. Se genera **lazy** mediante `ensureSessionsForWeek()` al consultar la semana. Por cada `ClassSchedule` con `isActive: true` y `deletedAt: null`, se crea **una `ClassSession` por cada día** del array `days`.
 - El alumno reserva sesiones individuales — puede anotarse al martes de Femenino sin estar en el jueves.
 - `Booking.weekStart` = lunes de la semana, usado para contar cupo semanal por alumno
 - `Student.belt` es `String` (no enum Prisma) para que las opciones sean configurables desde `SystemConfig.belt_options`
@@ -162,7 +164,7 @@ SystemConfig  (tabla key/value para configuración)
 
 Archivo clave: `src/lib/classes.ts`
 
-1. Al listar clases de una semana, `ensureSessionsForWeek()` crea los `ClassSession` faltantes a partir de los `ClassSchedule` activos
+1. Al listar clases de una semana, `ensureSessionsForWeek()` crea los `ClassSession` faltantes a partir de los `ClassSchedule` con `isActive: true` y `deletedAt: null`
 2. Al reservar se valida:
    - El alumno tiene status `ACTIVE`
    - Tiene un `StudentPlan` activo
@@ -187,9 +189,9 @@ Archivo clave: `src/lib/classes.ts`
 | POST | `/api/students/[id]/plan` | Asignar plan (admin) |
 | GET / POST | `/api/plans` | Listar / crear planes |
 | GET / PUT / DELETE | `/api/plans/[id]` | Ver / editar / eliminar plan |
-| GET / POST | `/api/classes/schedules` | Plantillas de clase recurrentes. POST acepta `days: DayOfWeek[]` |
-| GET / PUT / DELETE | `/api/classes/schedules/[id]` | Ver / editar / eliminar plantilla. PATCH acepta `days: DayOfWeek[]` |
-| GET / POST | `/api/classes/sessions?week=YYYY-MM-DD` | Sesiones de una semana (genera lazy) / crear sesión manual |
+| GET / POST | `/api/classes/schedules` | Listar plantillas (excluye `deletedAt != null`) / crear. POST acepta `days: DayOfWeek[]` |
+| GET / PATCH / DELETE | `/api/classes/schedules/[id]` | Ver / editar / eliminar (baja lógica: setea `deletedAt`). PATCH acepta `days: DayOfWeek[]`, `name`, `startTime`, `duration`, `maxCapacity`, `planIds`, `isActive` |
+| GET / POST | `/api/classes/sessions?week=YYYY-MM-DD` | Sesiones de una semana (genera lazy, solo de schedules activos y no eliminados) / crear sesión manual |
 | GET / PUT / DELETE | `/api/classes/sessions/[id]` | Ver / cancelar o modificar sesión puntual |
 | GET / POST | `/api/bookings` | Ver / crear reservas |
 | GET / PUT / DELETE | `/api/bookings/[id]` | Ver / editar / cancelar reserva |
