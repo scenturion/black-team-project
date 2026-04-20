@@ -27,7 +27,7 @@ export interface SessionWithSchedule {
     startTime: string;
     duration: number;
     maxCapacity: number;
-    dayOfWeek: string;
+    days: string[];
   };
   _count?: {
     bookings: number;

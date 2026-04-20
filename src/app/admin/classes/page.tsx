@@ -13,7 +13,11 @@ export default async function ClassesPage() {
     orderBy: { startTime: "asc" },
   });
 
-  const sorted = [...schedules].sort((a, b) => DAY_ORDER.indexOf(a.dayOfWeek) - DAY_ORDER.indexOf(b.dayOfWeek));
+  const sorted = [...schedules].sort((a, b) => {
+    const aFirst = DAY_ORDER.indexOf(a.days[0] ?? "LUNES");
+    const bFirst = DAY_ORDER.indexOf(b.days[0] ?? "LUNES");
+    return aFirst - bFirst;
+  });
 
   return (
     <div className="space-y-6">
@@ -27,7 +31,9 @@ export default async function ClassesPage() {
           <div key={s.id} className={`card ${!s.isActive ? "opacity-60" : ""}`}>
             <div className="flex items-start justify-between mb-2">
               <div>
-                <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide">{DAY_LABELS[s.dayOfWeek]}</p>
+                <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
+                  {s.days.map((d) => DAY_LABELS[d]).join(" · ")}
+                </p>
                 <h3 className="font-semibold text-gray-900">{s.name}</h3>
               </div>
               {!s.isActive && <span className="badge-gray text-xs">Inactiva</span>}

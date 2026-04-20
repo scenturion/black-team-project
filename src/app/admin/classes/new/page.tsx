@@ -6,12 +6,19 @@ import Link from "next/link";
 
 interface Plan { id: string; name: string }
 
+const ALL_DAYS = ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO", "DOMINGO"] as const;
+const DAY_LABELS: Record<string, string> = {
+  LUNES: "Lun", MARTES: "Mar", MIERCOLES: "Mié",
+  JUEVES: "Jue", VIERNES: "Vie", SABADO: "Sáb", DOMINGO: "Dom",
+};
+
 export default function NewClassPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [plans, setPlans] = useState<Plan[]>([]);
   const [selectedPlans, setSelectedPlans] = useState<string[]>([]);
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
   useEffect(() => {
     fetch("/api/plans").then((r) => r.json()).then(setPlans);
@@ -21,8 +28,13 @@ export default function NewClassPage() {
     setSelectedPlans((prev) => prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]);
   };
 
+  const toggleDay = (day: string) => {
+    setSelectedDays((prev) => prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (selectedDays.length === 0) { setError("Seleccioná al menos un día"); return; }
     setLoading(true);
     setError("");
 
@@ -33,7 +45,7 @@ export default function NewClassPage() {
       body: JSON.stringify({
         name: fd.get("name"),
         description: fd.get("description"),
-        dayOfWeek: fd.get("dayOfWeek"),
+        days: selectedDays,
         startTime: fd.get("startTime"),
         duration: parseInt(fd.get("duration") as string),
         maxCapacity: parseInt(fd.get("maxCapacity") as string),
@@ -63,31 +75,42 @@ export default function NewClassPage() {
 
         <div>
           <label className="label">Nombre *</label>
-          <input name="name" required className="input" placeholder="BJJ Principiantes" />
+          <input name="name" required className="input" placeholder="BJJ General" />
         </div>
         <div>
           <label className="label">Descripción</label>
           <textarea name="description" className="input" rows={2} />
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="label">Día de la semana *</label>
-            <select name="dayOfWeek" required className="input">
-              {["LUNES","MARTES","MIERCOLES","JUEVES","VIERNES","SABADO","DOMINGO"].map((d) => (
-                <option key={d} value={d}>{d.charAt(0) + d.slice(1).toLowerCase()}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="label">Horario *</label>
-            <input name="startTime" type="time" required className="input" />
+        <div>
+          <label className="label">Días de la semana *</label>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {ALL_DAYS.map((day) => (
+              <button
+                key={day}
+                type="button"
+                onClick={() => toggleDay(day)}
+                className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                  selectedDays.includes(day)
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "bg-white text-gray-700 border-gray-300 hover:border-blue-400"
+                }`}
+              >
+                {DAY_LABELS[day]}
+              </button>
+            ))}
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
+            <label className="label">Horario *</label>
+            <input name="startTime" type="time" required className="input" />
+          </div>
+          <div>
             <label className="label">Duración (minutos) *</label>
             <input name="duration" type="number" required min={15} defaultValue={60} className="input" />
           </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="label">Cupos máximos *</label>
             <input name="maxCapacity" type="number" required min={1} defaultValue={15} className="input" />

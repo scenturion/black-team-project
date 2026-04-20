@@ -32,25 +32,27 @@ export async function ensureSessionsForWeek(weekStart: Date): Promise<void> {
   });
 
   for (const schedule of activeSchedules) {
-    const targetDayIndex = DAY_MAP[schedule.dayOfWeek];
     const weekDates = getWeekDates(weekStart);
-    const sessionDate = weekDates.find((d) => d.getDay() === targetDayIndex);
-    if (!sessionDate) continue;
+    for (const day of schedule.days) {
+      const targetDayIndex = DAY_MAP[day];
+      const sessionDate = weekDates.find((d) => d.getDay() === targetDayIndex);
+      if (!sessionDate) continue;
 
-    await prisma.classSession.upsert({
-      where: {
-        classScheduleId_date: {
+      await prisma.classSession.upsert({
+        where: {
+          classScheduleId_date: {
+            classScheduleId: schedule.id,
+            date: sessionDate,
+          },
+        },
+        update: {},
+        create: {
           classScheduleId: schedule.id,
           date: sessionDate,
+          status: "ACTIVE",
         },
-      },
-      update: {},
-      create: {
-        classScheduleId: schedule.id,
-        date: sessionDate,
-        status: "ACTIVE",
-      },
-    });
+      });
+    }
   }
 }
 

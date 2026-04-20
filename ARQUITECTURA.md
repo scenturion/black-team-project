@@ -149,10 +149,12 @@ SystemConfig  (tabla key/value para configuración)
 
 ### Notas de diseño
 
-- `ClassSchedule` = plantilla recurrente (ej: "BJJ Lunes 19hs")
-- `ClassSession` = instancia concreta de una fecha. Se genera **lazy** mediante `ensureSessionsForWeek()` al consultar la semana
+- `ClassSchedule` = plantilla recurrente (ej: "BJJ General — Lunes, Miércoles y Viernes a las 20 hs"). El campo `days` es un array de `DayOfWeek` (ej: `["LUNES", "MIERCOLES", "VIERNES"]`), lo que permite que una misma clase ocurra en múltiples días de la semana con el mismo horario y capacidad.
+- `ClassSession` = instancia concreta de una fecha. Se genera **lazy** mediante `ensureSessionsForWeek()` al consultar la semana. Por cada `ClassSchedule` activo, se crea **una `ClassSession` por cada día** del array `days`.
+- El alumno reserva sesiones individuales — puede anotarse al martes de Femenino sin estar en el jueves.
 - `Booking.weekStart` = lunes de la semana, usado para contar cupo semanal por alumno
 - `Student.belt` es `String` (no enum Prisma) para que las opciones sean configurables desde `SystemConfig.belt_options`
+- `Student.beltLockedByAdmin` (`Boolean @default(false)`): cuando el admin edita `belt` o `beltGrade` vía PATCH, este flag se activa. Una vez activo, el alumno solo puede ver su cinturón/grado desde el perfil, no modificarlos
 
 ---
 
@@ -180,13 +182,13 @@ Archivo clave: `src/lib/classes.ts`
 | POST | `/api/auth/logout` | Elimina cookie |
 | GET | `/api/auth/me` | Datos del usuario actual |
 | GET / POST | `/api/students` | Listar / crear alumno (admin) |
-| GET / PATCH / DELETE | `/api/students/[id]` | Ver / editar / eliminar alumno. Admin: edita todos los campos incluyendo email, password y guardian. Alumno: solo campos propios limitados |
+| GET / PATCH / DELETE | `/api/students/[id]` | Ver / editar / eliminar alumno. Admin: edita todos los campos incluyendo email, password y guardian (al editar belt/beltGrade activa `beltLockedByAdmin`). Alumno: edita phone, weight, emergencia, notas médicas, termsAcceptedAt; puede editar belt/beltGrade solo si `beltLockedByAdmin === false` |
 | POST | `/api/students/[id]/approve` | Aprobar alumno (admin) |
 | POST | `/api/students/[id]/plan` | Asignar plan (admin) |
 | GET / POST | `/api/plans` | Listar / crear planes |
 | GET / PUT / DELETE | `/api/plans/[id]` | Ver / editar / eliminar plan |
-| GET / POST | `/api/classes/schedules` | Plantillas de clase recurrentes |
-| GET / PUT / DELETE | `/api/classes/schedules/[id]` | Ver / editar / eliminar plantilla |
+| GET / POST | `/api/classes/schedules` | Plantillas de clase recurrentes. POST acepta `days: DayOfWeek[]` |
+| GET / PUT / DELETE | `/api/classes/schedules/[id]` | Ver / editar / eliminar plantilla. PATCH acepta `days: DayOfWeek[]` |
 | GET / POST | `/api/classes/sessions?week=YYYY-MM-DD` | Sesiones de una semana (genera lazy) / crear sesión manual |
 | GET / PUT / DELETE | `/api/classes/sessions/[id]` | Ver / cancelar o modificar sesión puntual |
 | GET / POST | `/api/bookings` | Ver / crear reservas |
@@ -325,11 +327,11 @@ Creadas por `npm run db:seed`.
 
 | Tarea | Detalle |
 |-------|---------|
-| `.gitignore` | Crear archivo para excluir `node_modules`, `.next`, `.env`, `.env.local`, `public/uploads/` |
+| ~~`.gitignore`~~ | ~~Crear archivo para excluir `node_modules`, `.next`, `.env`, `.env.local`, `public/uploads/`~~ ✓ Hecho |
 | Tests | No hay suite de tests configurada |
 | Storage en nube | Reemplazar `src/lib/storage.ts` por AWS S3 o Cloudflare R2. La interfaz ya está abstraída (`saveFile`, `deleteFile`) |
 | Email activo | Agregar `SENDGRID_API_KEY` en variables de entorno |
-| Render deploy | Completar `render.yaml` con repo real, ajustar región y nombres |
+| ~~Render deploy~~ | ~~Completar `render.yaml` con repo real, ajustar región y nombres~~ ✓ Hecho — repo `scenturion/black-team-project`, plan free, schema+seed corren en `startCommand`. `db push` usa `--accept-data-loss` para soportar migraciones destructivas. |
 | Seguridad | Rotar `JWT_SECRET`, considerar rate limiting en `/api/auth/login` |
 | Dominio | Configurar `APP_BASE_URL` con dominio real |
 | Backups | Activar backups automáticos en Render Postgres |

@@ -6,7 +6,7 @@ import Link from "next/link";
 
 interface Session { id: string; date: string; status: string; startTime: string | null; _count?: { bookings: number } }
 interface Schedule {
-  id: string; name: string; description: string | null; dayOfWeek: string; startTime: string;
+  id: string; name: string; description: string | null; days: string[]; startTime: string;
   duration: number; maxCapacity: number; isActive: boolean; validFrom: string; validUntil: string | null;
   plans: { planId: string; plan: { name: string } }[];
   sessions: Session[];
@@ -64,7 +64,7 @@ export default function ClassDetailPage() {
       <div className="card space-y-3">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-blue-600 font-semibold">{DAY_LABELS[schedule.dayOfWeek]}</p>
+            <p className="text-blue-600 font-semibold">{schedule.days.map((d) => DAY_LABELS[d]).join(" · ")}</p>
             {schedule.description && <p className="text-sm text-gray-500 mt-1">{schedule.description}</p>}
           </div>
           <button onClick={toggleActive} disabled={loading} className={schedule.isActive ? "btn-danger btn-sm" : "btn-success btn-sm"}>

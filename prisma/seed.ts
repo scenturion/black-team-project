@@ -80,10 +80,10 @@ async function main() {
 
   // Sample class schedules
   const schedules = [
-    { name: "BJJ Principiantes - Lunes", dayOfWeek: DayOfWeek.LUNES, startTime: "19:00", duration: 60, maxCapacity: 15 },
-    { name: "BJJ Avanzado - Miércoles", dayOfWeek: DayOfWeek.MIERCOLES, startTime: "20:00", duration: 90, maxCapacity: 12 },
-    { name: "BJJ Todos los niveles - Viernes", dayOfWeek: DayOfWeek.VIERNES, startTime: "19:00", duration: 60, maxCapacity: 20 },
-    { name: "BJJ Competición - Sábado", dayOfWeek: DayOfWeek.SABADO, startTime: "10:00", duration: 120, maxCapacity: 10 },
+    { name: "BJJ General", days: [DayOfWeek.LUNES, DayOfWeek.MIERCOLES, DayOfWeek.VIERNES], startTime: "20:00", duration: 60, maxCapacity: 20 },
+    { name: "Femenino", days: [DayOfWeek.MARTES, DayOfWeek.JUEVES], startTime: "19:00", duration: 60, maxCapacity: 15 },
+    { name: "Grappling", days: [DayOfWeek.MARTES, DayOfWeek.JUEVES], startTime: "20:00", duration: 60, maxCapacity: 12 },
+    { name: "Competición", days: [DayOfWeek.SABADO], startTime: "10:00", duration: 120, maxCapacity: 10 },
   ];
 
   for (const schedule of schedules) {

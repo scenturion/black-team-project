@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
     where: { studentId },
     include: {
       classSession: {
-        include: { classSchedule: { select: { name: true, startTime: true, dayOfWeek: true } } },
+        include: { classSchedule: { select: { name: true, startTime: true, days: true } } },
       },
     },
     orderBy: { classSession: { date: "desc" } },

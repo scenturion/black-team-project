@@ -182,10 +182,10 @@ model StudentPlan {
 }
 
 model ClassSchedule {
-  id          String    @id @default(cuid())
+  id          String      @id @default(cuid())
   name        String
   description String?
-  dayOfWeek   DayOfWeek
+  days        DayOfWeek[]
   startTime   String
   duration    Int
   maxCapacity Int
