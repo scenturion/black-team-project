@@ -120,6 +120,7 @@ model Student {
   status               StudentStatus @default(PENDING_APPROVAL)
   termsAcceptedAt      DateTime?
   isMinor              Boolean       @default(false)
+  beltLockedByAdmin    Boolean       @default(false)
   approvedById         String?
   approvedBy           User?         @relation("ApprovedBy", fields: [approvedById], references: [id])
   approvedAt           DateTime?

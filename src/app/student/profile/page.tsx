@@ -5,7 +5,8 @@ import { beltLabel } from "@/lib/utils";
 
 interface Student {
   id: string; firstName: string; lastName: string; phone: string | null; dni: string | null;
-  belt: string; beltGrade: number; weight: number | null; medicalNotes: string | null;
+  belt: string; beltGrade: number; beltLockedByAdmin: boolean;
+  weight: number | null; medicalNotes: string | null;
   allergiesAndInjuries: string | null; emergencyContactName: string; emergencyContactPhone: string;
   termsAcceptedAt: string | null; isMinor: boolean;
   user: { email: string };
@@ -16,58 +17,80 @@ interface Config { key: string; value: string }
 export default function StudentProfilePage() {
   const [student, setStudent] = useState<Student | null>(null);
   const [termsText, setTermsText] = useState("");
+  const [beltOptions, setBeltOptions] = useState<string[]>(["BLANCO", "AZUL", "VIOLETA", "MARRON", "NEGRO"]);
   const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetch("/api/auth/me").then((r) => r.json()).then((data) => {
-      if (data.student) setStudent(data.student as Student & { user: { email: string } });
+      if (data.student) setStudent(data.student as Student);
     });
     fetch("/api/config").then((r) => r.json()).then((configs: Config[]) => {
       const terms = configs.find((c) => c.key === "terms_and_conditions");
       if (terms) setTermsText(terms.value);
+      const belts = configs.find((c) => c.key === "belt_options");
+      if (belts) {
+        try { setBeltOptions(JSON.parse(belts.value)); } catch { /* keep default */ }
+      }
     });
   }, []);
 
   const acceptTerms = async () => {
     if (!student) return;
     setLoading(true);
-    await fetch(`/api/students/${student.id}`, {
+    const res = await fetch(`/api/students/${student.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ termsAcceptedAt: new Date().toISOString() } as Record<string, string>),
+      body: JSON.stringify({ termsAcceptedAt: new Date().toISOString() }),
     });
-    setMessage("Términos aceptados");
+    if (res.ok) {
+      setStudent((prev) => prev ? { ...prev, termsAcceptedAt: new Date().toISOString() } : prev);
+      setMessage("Términos aceptados");
+      setTimeout(() => setMessage(""), 3000);
+    }
     setLoading(false);
-    setTimeout(() => setMessage(""), 3000);
   };
 
   const handleEdit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!student) return;
     setLoading(true);
+    setError("");
     const fd = new FormData(e.currentTarget);
+
+    const payload: Record<string, unknown> = {
+      phone: fd.get("phone") || null,
+      emergencyContactName: fd.get("emergencyContactName"),
+      emergencyContactPhone: fd.get("emergencyContactPhone"),
+      medicalNotes: fd.get("medicalNotes") || null,
+      allergiesAndInjuries: fd.get("allergiesAndInjuries") || null,
+      weight: fd.get("weight") ? parseFloat(fd.get("weight") as string) : null,
+    };
+
+    if (!student.beltLockedByAdmin) {
+      payload.belt = fd.get("belt");
+      payload.beltGrade = parseInt(fd.get("beltGrade") as string, 10);
+    }
+
     const res = await fetch(`/api/students/${student.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        phone: fd.get("phone"),
-        emergencyContactName: fd.get("emergencyContactName"),
-        emergencyContactPhone: fd.get("emergencyContactPhone"),
-        medicalNotes: fd.get("medicalNotes"),
-        allergiesAndInjuries: fd.get("allergiesAndInjuries"),
-        weight: fd.get("weight") ? parseFloat(fd.get("weight") as string) : undefined,
-      }),
+      body: JSON.stringify(payload),
     });
+
     if (res.ok) {
       const updated = await res.json();
       setStudent((prev) => prev ? { ...prev, ...updated } : prev);
       setEditing(false);
       setMessage("Perfil actualizado");
+      setTimeout(() => setMessage(""), 3000);
+    } else {
+      const err = await res.json();
+      setError(err.error || "Error al guardar");
     }
     setLoading(false);
-    setTimeout(() => setMessage(""), 3000);
   };
 
   if (!student) return <div className="text-center py-10 text-gray-500">Cargando...</div>;
@@ -79,6 +102,9 @@ export default function StudentProfilePage() {
       {message && (
         <div className="p-3 rounded-lg text-sm font-medium bg-green-50 text-green-700 border border-green-200">{message}</div>
       )}
+      {error && (
+        <div className="p-3 rounded-lg text-sm font-medium bg-red-50 text-red-700 border border-red-200">{error}</div>
+      )}
 
       <div className="card">
         <div className="flex items-start justify-between mb-4">
@@ -89,6 +115,7 @@ export default function StudentProfilePage() {
           <div className="text-right">
             <p className="font-semibold text-blue-700">{beltLabel(student.belt)}</p>
             {student.beltGrade > 0 && <p className="text-sm text-gray-500">Grado {student.beltGrade}</p>}
+            {student.beltLockedByAdmin && <p className="text-xs text-gray-400 mt-1">Definido por el admin</p>}
           </div>
         </div>
 
@@ -106,8 +133,28 @@ export default function StudentProfilePage() {
           </div>
         ) : (
           <form onSubmit={handleEdit} className="space-y-3">
+            {!student.beltLockedByAdmin && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label">Cinturón</label>
+                  <select name="belt" defaultValue={student.belt} className="input">
+                    {beltOptions.map((b) => (
+                      <option key={b} value={b}>{beltLabel(b)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="label">Grado</label>
+                  <select name="beltGrade" defaultValue={student.beltGrade} className="input">
+                    {Array.from({ length: 11 }, (_, i) => (
+                      <option key={i} value={i}>{i === 0 ? "Sin grado" : `Grado ${i}`}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
             <div><label className="label">Teléfono</label><input name="phone" defaultValue={student.phone || ""} className="input" /></div>
-            <div><label className="label">Peso (kg)</label><input name="weight" type="number" defaultValue={student.weight || ""} className="input" /></div>
+            <div><label className="label">Peso (kg)</label><input name="weight" type="number" step="0.1" defaultValue={student.weight || ""} className="input" /></div>
             <div><label className="label">Contacto de emergencia</label><input name="emergencyContactName" required defaultValue={student.emergencyContactName} className="input" /></div>
             <div><label className="label">Teléfono de emergencia</label><input name="emergencyContactPhone" required defaultValue={student.emergencyContactPhone} className="input" /></div>
             <div><label className="label">Observaciones médicas</label><textarea name="medicalNotes" defaultValue={student.medicalNotes || ""} className="input" rows={2} /></div>

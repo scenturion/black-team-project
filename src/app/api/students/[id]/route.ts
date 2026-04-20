@@ -72,6 +72,9 @@ const studentUpdateSchema = z.object({
   allergiesAndInjuries: z.string().nullable().optional(),
   emergencyContactName: z.string().min(1).optional(),
   emergencyContactPhone: z.string().min(1).optional(),
+  belt: z.string().optional(),
+  beltGrade: z.number().min(0).max(10).optional(),
+  termsAcceptedAt: z.string().optional(),
 });
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -88,7 +91,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const body = await req.json();
     const parsed = studentUpdateSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ error: "Datos inválidos" }, { status: 400 });
-    const updated = await prisma.student.update({ where: { id }, data: parsed.data });
+
+    const { belt, beltGrade, termsAcceptedAt, ...basicFields } = parsed.data;
+    const updateData: Record<string, unknown> = { ...basicFields };
+
+    if (!ownStudent.beltLockedByAdmin) {
+      if (belt !== undefined) updateData.belt = belt;
+      if (beltGrade !== undefined) updateData.beltGrade = beltGrade;
+    }
+    if (termsAcceptedAt) updateData.termsAcceptedAt = new Date(termsAcceptedAt);
+
+    const updated = await prisma.student.update({ where: { id }, data: updateData });
     return NextResponse.json(updated);
   }
 
@@ -103,6 +116,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const studentData: Record<string, unknown> = { ...studentFields };
   if (birthDate) studentData.birthDate = new Date(birthDate);
+  if (studentFields.belt !== undefined || studentFields.beltGrade !== undefined) {
+    studentData.beltLockedByAdmin = true;
+  }
 
   const updated = await prisma.student.update({ where: { id }, data: studentData });
 
