@@ -5,7 +5,7 @@ services:
     plan: free
     region: ohio
     buildCommand: npm ci --include=dev && npx prisma generate && npm run build
-    startCommand: npm run start
+    startCommand: npx prisma db push && npm run db:seed && npm run start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
