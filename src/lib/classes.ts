@@ -26,6 +26,7 @@ export async function ensureSessionsForWeek(weekStart: Date): Promise<void> {
   const activeSchedules = await prisma.classSchedule.findMany({
     where: {
       isActive: true,
+      deletedAt: null,
       validFrom: { lte: weekEnd },
       OR: [{ validUntil: null }, { validUntil: { gte: weekStart } }],
     },

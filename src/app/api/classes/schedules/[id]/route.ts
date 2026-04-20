@@ -63,3 +63,22 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   await createAuditLog(session.userId, "UPDATE_CLASS_SCHEDULE", "ClassSchedule", id, before, updated);
   return NextResponse.json(updated);
 }
+
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const session = await getSession();
+  if (!session || session.role !== "ADMIN") {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const before = await prisma.classSchedule.findUnique({ where: { id } });
+  if (!before) return NextResponse.json({ error: "Clase no encontrada" }, { status: 404 });
+
+  await prisma.classSchedule.update({
+    where: { id },
+    data: { deletedAt: new Date() },
+  });
+
+  await createAuditLog(session.userId, "DELETE_CLASS_SCHEDULE", "ClassSchedule", id, before, null);
+  return NextResponse.json({ ok: true });
+}

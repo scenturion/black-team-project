@@ -192,6 +192,7 @@ model ClassSchedule {
   isActive    Boolean   @default(true)
   validFrom   DateTime
   validUntil  DateTime?
+  deletedAt   DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 

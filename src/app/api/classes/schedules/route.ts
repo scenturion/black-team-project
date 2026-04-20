@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth";
 
 export async function GET() {
   const schedules = await prisma.classSchedule.findMany({
+    where: { deletedAt: null },
     include: {
       plans: { include: { plan: { select: { id: true, name: true } } } },
     },

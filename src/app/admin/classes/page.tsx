@@ -9,6 +9,7 @@ const DAY_ORDER = ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO"
 
 export default async function ClassesPage() {
   const schedules = await prisma.classSchedule.findMany({
+    where: { deletedAt: null },
     include: { plans: { include: { plan: { select: { name: true } } } } },
     orderBy: { startTime: "asc" },
   });

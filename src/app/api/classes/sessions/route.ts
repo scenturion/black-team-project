@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
   const sessions = await prisma.classSession.findMany({
     where: {
       date: { gte: weekStart, lte: weekEnd },
+      classSchedule: { isActive: true, deletedAt: null },
     },
     include: {
       classSchedule: {
