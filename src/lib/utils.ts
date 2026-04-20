@@ -1,13 +1,3 @@
-import { NextResponse } from "next/server";
-
-export function apiError(message: string, status = 400) {
-  return NextResponse.json({ error: message }, { status });
-}
-
-export function apiSuccess<T>(data: T, status = 200) {
-  return NextResponse.json(data, { status });
-}
-
 export function getCurrentPeriod(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
