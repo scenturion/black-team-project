@@ -36,7 +36,7 @@ export async function ensureSessionsForWeek(weekStart: Date): Promise<void> {
     const weekDates = getWeekDates(weekStart);
     for (const day of schedule.days) {
       const targetDayIndex = DAY_MAP[day];
-      const sessionDate = weekDates.find((d) => d.getDay() === targetDayIndex);
+      const sessionDate = weekDates.find((d) => d.getUTCDay() === targetDayIndex);
       if (!sessionDate) continue;
 
       await prisma.classSession.upsert({

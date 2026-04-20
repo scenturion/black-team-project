@@ -134,7 +134,7 @@ export default async function StudentDashboard() {
                 <div>
                   <p className="text-sm font-medium text-gray-900">{b.classSession.classSchedule.name}</p>
                   <p className="text-xs text-gray-500">
-                    {b.classSession.date.toLocaleDateString("es-AR")} · {b.classSession.classSchedule.startTime}
+                    {b.classSession.date.toLocaleDateString("es-AR", { timeZone: "UTC" })} · {b.classSession.classSchedule.startTime}
                   </p>
                 </div>
                 <span className="badge-green text-xs">Reservada</span>

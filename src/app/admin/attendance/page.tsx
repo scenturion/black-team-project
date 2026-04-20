@@ -94,7 +94,7 @@ export default function AttendancePage() {
                   }`}
                 >
                   <p className="text-sm font-medium text-gray-900">{s.classSchedule.name}</p>
-                  <p className="text-xs text-gray-500">{new Date(s.date).toLocaleDateString("es-AR")} · {s.effectiveStartTime}</p>
+                  <p className="text-xs text-gray-500">{new Date(s.date).toLocaleDateString("es-AR", { timeZone: "UTC" })} · {s.effectiveStartTime}</p>
                   <p className="text-xs text-gray-400">{s._count.bookings} reserva(s)</p>
                 </button>
               ))}
@@ -107,7 +107,7 @@ export default function AttendancePage() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="section-title">{selectedSession.classSchedule.name}</h2>
-                <p className="text-sm text-gray-500">{new Date(selectedSession.date).toLocaleDateString("es-AR")} · {selectedSession.effectiveStartTime}</p>
+                <p className="text-sm text-gray-500">{new Date(selectedSession.date).toLocaleDateString("es-AR", { timeZone: "UTC" })} · {selectedSession.effectiveStartTime}</p>
               </div>
               <button onClick={saveAttendance} disabled={saving} className="btn-primary">
                 {saving ? "Guardando..." : "Guardar asistencia"}

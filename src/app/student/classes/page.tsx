@@ -102,7 +102,7 @@ export default function StudentClassesPage() {
                     {isFull && <span className="badge-gray text-xs">Sin cupos</span>}
                   </div>
                   <p className="text-sm text-gray-500 mt-0.5">
-                    {new Date(s.date).toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" })} · {s.effectiveStartTime} hs · {s.effectiveDuration} min
+                    {new Date(s.date).toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })} · {s.effectiveStartTime} hs · {s.effectiveDuration} min
                   </p>
                   <p className="text-xs text-gray-400 mt-0.5">
                     {available > 0 ? `${available} cupo${available !== 1 ? "s" : ""} disponible${available !== 1 ? "s" : ""}` : "Sin cupos"}

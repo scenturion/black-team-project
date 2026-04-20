@@ -164,7 +164,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
               {student.attendances.map((a) => (
                 <tr key={a.id} className="border-b border-gray-100">
                   <td className="py-2">{a.classSession.classSchedule.name}</td>
-                  <td className="py-2 text-gray-500">{a.classSession.date.toLocaleDateString("es-AR")}</td>
+                  <td className="py-2 text-gray-500">{a.classSession.date.toLocaleDateString("es-AR", { timeZone: "UTC" })}</td>
                   <td className="py-2">
                     <span className={a.present ? "badge-green" : "badge-red"}>
                       {a.present ? "Presente" : "Ausente"}

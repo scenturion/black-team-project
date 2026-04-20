@@ -255,7 +255,7 @@ export default function ClassDetailPage() {
             <tbody>
               {schedule.sessions.map((s) => (
                 <tr key={s.id} className="border-b border-gray-100">
-                  <td className="py-2">{new Date(s.date).toLocaleDateString("es-AR")}</td>
+                  <td className="py-2">{new Date(s.date).toLocaleDateString("es-AR", { timeZone: "UTC" })}</td>
                   <td className="py-2">{s.startTime || schedule.startTime}</td>
                   <td className="py-2">
                     <span className={s.status === "ACTIVE" ? "badge-green" : s.status === "CANCELLED" ? "badge-red" : "badge-yellow"}>

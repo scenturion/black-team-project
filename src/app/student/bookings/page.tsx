@@ -75,7 +75,7 @@ export default function BookingsPage() {
                 <div>
                   <p className="font-medium text-gray-900">{b.classSession.classSchedule.name}</p>
                   <p className="text-sm text-gray-500">
-                    {new Date(b.classSession.date).toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" })} · {b.classSession.classSchedule.startTime}
+                    {new Date(b.classSession.date).toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })} · {b.classSession.classSchedule.startTime}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -112,7 +112,7 @@ export default function BookingsPage() {
                 {past.slice(0, 30).map((b) => (
                   <tr key={b.id} className="border-b border-gray-100">
                     <td className="py-2">{b.classSession.classSchedule.name}</td>
-                    <td className="py-2 text-gray-500">{new Date(b.classSession.date).toLocaleDateString("es-AR")}</td>
+                    <td className="py-2 text-gray-500">{new Date(b.classSession.date).toLocaleDateString("es-AR", { timeZone: "UTC" })}</td>
                     <td className="py-2"><span className={STATUS_BADGE[b.status]}>{STATUS_LABELS[b.status]}</span></td>
                   </tr>
                 ))}

@@ -63,7 +63,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     select: { student: { select: { userId: true } } },
   });
   const userIds = bookings.map((b) => b.student.userId);
-  const dateStr = before.date.toLocaleDateString("es-AR");
+  const dateStr = before.date.toLocaleDateString("es-AR", { timeZone: "UTC" });
 
   if (updated.status === "CANCELLED") {
     await notifyClassCancelled(userIds, before.classSchedule.name, dateStr);
